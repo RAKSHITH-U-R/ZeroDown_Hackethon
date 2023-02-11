@@ -78,43 +78,48 @@ def score_calc(data):
 
             score.append(hotness_score)
     score = sum(score)/len(score)
+
     return score
-# def hotness_calc(data):
-#     head = ['market_id', 'sold_homes_count', 'new_listings_count',
-#             'homes_sold_over_list_price_count', 'median_sale_to_list_ratio', 'days_to_sell']
-#     data = data_processing(data, head)
-
-#     hot_list = {}
-#     for row in data.index:
-
-#         sold_homes_count = data['sold_homes_count'][row]
-#         new_listings_count = data['new_listings_count'][row]
-#         homes_sold_over_list_price_count = data['homes_sold_over_list_price_count'][row]
-#         median_sale_to_list_ratio = data['median_sale_to_list_ratio'][row]
-#         days_to_sell = data['days_to_sell'][row]
-
-#         if new_listings_count != 0 and sold_homes_count != 0 and homes_sold_over_list_price_count != 0 and days_to_sell != 0:
-
-#             hotness_score = (sold_homes_count / new_listings_count) * (homes_sold_over_list_price_count /
-#                                                                        sold_homes_count) * (1 - (median_sale_to_list_ratio)) * (1 / days_to_sell)
-#             hot_list.setdefault(int(data['market_id'][row]),
-#                                 []).append(hotness_score)
-#     for key in hot_list:
-#         hot_list[key] = sum(hot_list[key]) / len(hot_list[key])
-#     return hot_list
 
 
-# @app.get("/hotness")
-# def hotness():
-#     table_name = os.environ.get('METRIC')
-#     try:
-#         cur.execute(
-#             f"SELECT market_id,sold_homes_count,new_listings_count,homes_sold_over_list_price_count,median_sale_to_list_ratio,days_to_sell FROM {table_name}")
-#         rows = cur.fetchall()
-#         data = hotness_calc(rows)
-#         return json.dumps(data)
-#     except Exception as e:
-#         raise HTTPException(status_code=500, detail=str(e))
+def hotness_calc(data):
+    head = ['market_id', 'sold_homes_count', 'new_listings_count',
+            'homes_sold_over_list_price_count', 'median_sale_to_list_ratio', 'days_to_sell']
+    data = data_processing(data, head)
+
+    hot_list = {}
+    for row in data.index:
+
+        sold_homes_count = data['sold_homes_count'][row]
+        new_listings_count = data['new_listings_count'][row]
+        homes_sold_over_list_price_count = data['homes_sold_over_list_price_count'][row]
+        median_sale_to_list_ratio = data['median_sale_to_list_ratio'][row]
+        days_to_sell = data['days_to_sell'][row]
+
+        if new_listings_count != 0 and sold_homes_count != 0 and homes_sold_over_list_price_count != 0 and days_to_sell != 0:
+
+            hotness_score = (sold_homes_count / new_listings_count) * (homes_sold_over_list_price_count /
+                                                                       sold_homes_count) * (1 - (median_sale_to_list_ratio)) * (1 / days_to_sell)*1000000
+            hot_list.setdefault(str(data['market_id'][row]),
+                                []).append(hotness_score)
+    for key in hot_list:
+        hot_list[key] = sum(hot_list[key]) / len(hot_list[key])
+    # print(hot_list)
+    return hot_list
+
+
+@app.get("/all")
+def hotness():
+    table_name = os.environ.get('METRIC')
+    try:
+        cur.execute(
+            f"SELECT market_id,sold_homes_count,new_listings_count,homes_sold_over_list_price_count,median_sale_to_list_ratio,days_to_sell FROM {table_name}")
+        rows = cur.fetchall()
+        data = hotness_calc(rows)
+        return data
+        # return json.dumps(data)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.get('/market/')
@@ -128,9 +133,7 @@ def get_score(market_id: int):
         if len(rows) == 0:
             print(len(rows))
             raise HTTPException(status=404, details="Market not found")
-            return JSONResponse(status_code=404)
         data = score_calc(rows)
         return data
     except Exception as e:
         return JSONResponse(status_code=404)
-        raise HTTPException(status_code=404, detail=str(e))
