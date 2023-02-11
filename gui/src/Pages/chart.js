@@ -1,9 +1,10 @@
 
 import React, { useState, useEffect } from 'react';
-import { Line } from 'react-chartjs-2';
+import { Line, Bar } from 'react-chartjs-2';
 
-export default function Chart() {
-    const [data, setData] = useState([]);
+export default function PChart() {
+    const [graph, setData] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
     const ploting = async () => {
 
         try {
@@ -24,6 +25,7 @@ export default function Chart() {
                 ]
             };
             setData(chartData);
+            setIsLoading(true);
             // console.log(chartData);
         } catch (error) {
             console.log("error", error);
@@ -35,12 +37,8 @@ export default function Chart() {
     }, []);
 
 
+
     return (
-        <div>
-            <h1>sfasfkjasfkj</h1>
-            <Line
-                data={data}
-            />
-        </div>
+        <div className='area'>{isLoading ? <div className="area"><Line data={graph} /> <Bar data={graph} /> </div> : <div> <h1>Wait.....</h1></div>}</div>
     );
 }

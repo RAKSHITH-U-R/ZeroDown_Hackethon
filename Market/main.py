@@ -74,7 +74,7 @@ def score_calc(data):
         if new_listings_count != 0 and sold_homes_count != 0 and homes_sold_over_list_price_count != 0 and days_to_sell != 0:
 
             hotness_score = (sold_homes_count / new_listings_count) * (homes_sold_over_list_price_count /
-                                                                       sold_homes_count) * (1 - (median_sale_to_list_ratio)) * (1 / days_to_sell) * 1000000
+                                                                       sold_homes_count) * (1 / days_to_sell) * 1000000
 
             score.append(hotness_score)
     score = sum(score)/len(score)
@@ -99,7 +99,7 @@ def hotness_calc(data):
         if new_listings_count != 0 and sold_homes_count != 0 and homes_sold_over_list_price_count != 0 and days_to_sell != 0:
 
             hotness_score = (sold_homes_count / new_listings_count) * (homes_sold_over_list_price_count /
-                                                                       sold_homes_count) * (1 - (median_sale_to_list_ratio)) * (1 / days_to_sell)*1000000
+                                                                       sold_homes_count) * (1 / days_to_sell)*1000000
             hot_list.setdefault(str(data['market_id'][row]),
                                 []).append(hotness_score)
     for key in hot_list:
