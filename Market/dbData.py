@@ -1,55 +1,6 @@
-from typing import Union
 import urllib.parse as up
 import psycopg2
-from fastapi import FastAPI, HTTPException, status
-from fastapi.responses import JSONResponse
-import json
-import os
-from fastapi.middleware.cors import CORSMiddleware
-from dotenv import load_dotenv
 import pandas as pd
-
-cur = None
-conn = None
-app = FastAPI()
-origins = [
-    "http://localhost:3000"
-]
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-
-@app.on_event("startup")
-async def startup():
-    load_dotenv()
-    global conn
-    up.uses_netloc.append("postgres")
-    url = up.urlparse(
-        "postgres://xfelfohc:F-fp4eg_sXBTG8evRgiYoIyABFX8y1UY@tiny.db.elephantsql.com/xfelfohc")
-    conn = psycopg2.connect(database=url.path[1:], user=url.username,
-                            password=url.password,
-                            host=url.hostname,
-                            port=url.port
-                            )
-    global cur
-    cur = conn.cursor()
-
-
-@app.on_event("shutdown")
-async def shutdown():
-    await conn.commit()
-    await conn.close()
-
-
-@app.get("/")
-def read_root():
-    return {"Hello": "World"}
 
 
 def data_processing(data, head):
@@ -104,37 +55,46 @@ def hotness_calc(data):
                                                                        sold_homes_count) * (1 / days_to_sell)*1000000
             hot_list.setdefault(str(data['market_id'][row]),
                                 []).append(hotness_score)
+        else:
+            hot_list.setdefault(str(data['market_id'][row]),
+                                []).append(0)
     for key in hot_list:
         hot_list[key] = sum(hot_list[key]) / len(hot_list[key])
     # print(hot_list)
     return hot_list
 
 
-@app.get("/all")
-def hotness():
-    table_name = os.environ.get('METRIC')
-    try:
-        cur.execute(
-            f"SELECT market_id,sold_homes_count,new_listings_count,homes_sold_over_list_price_count,median_sale_to_list_ratio,days_to_sell FROM {table_name}")
-        rows = cur.fetchall()
-        data = hotness_calc(rows)
-        return data
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+up.uses_netloc.append("postgres")
+url = up.urlparse(
+    "postgres://xfelfohc:F-fp4eg_sXBTG8evRgiYoIyABFX8y1UY@tiny.db.elephantsql.com/xfelfohc")
+conn = psycopg2.connect(database=url.path[1:],
+                        user=url.username,
+                        password=url.password,
+                        host=url.hostname,
+                        port=url.port
+                        )
+
+# with open("D:\data.txt", "w") as f:
+#     # sql = f.read()
+#     cur = conn.cursor()
+#     # cur.execute(sql)
+#     # conn.commit()
+#     # print("Insert Complete")
+#     cur.execute(
+#         f"SELECT market_id,sold_homes_count,new_listings_count,homes_sold_over_list_price_count,median_sale_to_list_ratio,days_to_sell FROM market_metrics")
+#     data = cur.fetchall()
+#     print("fetch complete")
+#     hot_list = hotness_calc(data)
+#     print("hotness complete")
+#     f.write("INSERT INTO market_hotness(market_id, market_hotness) VALUES")
+#     for key in hot_list:
+#         sql = f"({key}, {hot_list[key]}),"
+#         f.write(sql)
 
 
-@app.get('/market/')
-def get_score(market_id: int):
-    table_name = os.environ.get('METRIC')
-    try:
-        cur.execute(
-            f"SELECT market_id,sold_homes_count,new_listings_count,homes_sold_over_list_price_count,median_sale_to_list_ratio,days_to_sell FROM {table_name} WHERE market_id = {market_id}")
-        rows = cur.fetchall()
-
-        if len(rows) == 0:
-            print(len(rows))
-            raise HTTPException(status=404, details="Market not found")
-        data = score_calc(rows)
-        return data
-    except Exception as e:
-        return JSONResponse(status_code=404)
+with open("D:\market_hotness.sql", "r") as f:
+    sql = f.read()
+    cur = conn.cursor()
+    cur.execute(sql)
+    conn.commit()
+    print("Insert Complete")
