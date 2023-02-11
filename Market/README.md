@@ -15,7 +15,7 @@ Problems faced:
 1.  Fist problem Faced was in connecting to the Database which was local. So i hosted the database in elephantSQL and connected to it.
 2.  Initially i used to fetch data from the Database everytime the user enters the market id and calculate the Score. But this was taking a lot of time to respond back to server. which lead to timeout error.So i decided to calculate the score once and store it in another Table. Next time when the user enters the market id, the score is fetched from the table instead of calculating it again.
 
-## API Routes
+## backend Routes (API routes)
 
 https://market-rakshith-u-r.vercel.app/market?market_id="market_id"
 
