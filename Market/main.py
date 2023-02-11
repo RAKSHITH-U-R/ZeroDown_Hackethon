@@ -1,6 +1,7 @@
 from typing import Union
 import psycopg2
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, status
+from fastapi.responses import JSONResponse
 import json
 import os
 from fastapi.middleware.cors import CORSMiddleware
@@ -73,7 +74,7 @@ def score_calc(data):
         if new_listings_count != 0 and sold_homes_count != 0 and homes_sold_over_list_price_count != 0 and days_to_sell != 0:
 
             hotness_score = (sold_homes_count / new_listings_count) * (homes_sold_over_list_price_count /
-                                                                       sold_homes_count) * (1 - (median_sale_to_list_ratio)) * (1 / days_to_sell)
+                                                                       sold_homes_count) * (1 - (median_sale_to_list_ratio)) * (1 / days_to_sell) * 1000000
 
             score.append(hotness_score)
     score = sum(score)/len(score)
@@ -123,7 +124,13 @@ def get_score(market_id: int):
         cur.execute(
             f"SELECT market_id,sold_homes_count,new_listings_count,homes_sold_over_list_price_count,median_sale_to_list_ratio,days_to_sell FROM {table_name} WHERE market_id = {market_id}")
         rows = cur.fetchall()
+
+        if len(rows) == 0:
+            print(len(rows))
+            raise HTTPException(status=404, details="Market not found")
+            return JSONResponse(status_code=404)
         data = score_calc(rows)
         return data
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        return JSONResponse(status_code=404)
+        raise HTTPException(status_code=404, detail=str(e))
