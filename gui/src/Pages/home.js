@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import './home.css';
-import LineChart from './chart';
 export default function Home() {
 
     const [marketId, setMarketId] = useState('');
@@ -30,7 +29,6 @@ export default function Home() {
                     <input type="text" id="marketId" value={marketId} onChange={e => setMarketId(e.target.value)} />
                     <button type="submit">Calculate Score</button>
                 </form>
-                <button type="submit" onClick={LineChart}>plot</button>
                 {score && <div>Score: {score}</div>}
             </div>
         </div>
