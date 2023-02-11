@@ -13,7 +13,7 @@ cur = None
 conn = None
 app = FastAPI()
 origins = [
-    "http://localhost:3000"
+    "http://localhost:3000", "https://market-gui.vercel.app", "market-1a194uks2-rakshith-u-r.vercel.app"
 ]
 
 app.add_middleware(
