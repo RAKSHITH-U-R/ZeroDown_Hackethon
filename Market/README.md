@@ -26,3 +26,7 @@ above api is used to get the score of the market_id entered by the user.
 https://market-rakshith-u-r.vercel.app/all
 
 above api is used to get Scores of all the markets present in the database.
+
+https://market-rakshith-u-r.vercel.app/top5
+
+above api is used to get top 5 markets with highest score.

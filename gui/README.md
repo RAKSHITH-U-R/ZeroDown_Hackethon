@@ -12,7 +12,7 @@ https://market-gui.vercel.app/
 
 Above links renders a page where user can enter the market id and get the score of the market.
 
-https://market-gui.vercel.app/all
+https://market-gui.vercel.app/stats
 
 Above links renders a page where user can see the plots.
 
